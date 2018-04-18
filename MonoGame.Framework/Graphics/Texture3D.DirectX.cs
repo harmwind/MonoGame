@@ -11,8 +11,8 @@ using MapFlags = SharpDX.Direct3D11.MapFlags;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
-	public partial class Texture3D : Texture
-	{
+    public partial class Texture3D : Texture
+    {
         private bool renderTarget;
         private bool mipMap;
 
@@ -29,7 +29,7 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 
 
-        internal override SharpDX.Direct3D11.Resource CreateTexture()
+        internal override void CreateTexture()
         {
             var description = new Texture3DDescription
             {
@@ -56,12 +56,12 @@ namespace Microsoft.Xna.Framework.Graphics
                 }
             }
 
-            return new SharpDX.Direct3D11.Texture3D(GraphicsDevice._d3dDevice, description);
+            _texture = new SharpDX.Direct3D11.Texture3D(GraphicsDevice._d3dDevice, description);
         }
 
-	    private void PlatformSetData<T>(int level,
-                                     int left, int top, int right, int bottom, int front, int back,
-                                     T[] data, int startIndex, int elementCount, int width, int height, int depth)
+        private void PlatformSetData<T>(int level,
+                                       int left, int top, int right, int bottom, int front, int back,
+                                       T[] data, int startIndex, int elementCount, int width, int height, int depth)
         {
             var elementSizeInByte = Utilities.ReflectionHelpers.SizeOf<T>.Get();
             var dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
@@ -147,6 +147,6 @@ namespace Microsoft.Xna.Framework.Graphics
                 }
             }
         }
-	}
+    }
 }
 
