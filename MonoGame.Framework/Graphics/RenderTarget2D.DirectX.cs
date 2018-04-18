@@ -13,11 +13,17 @@ namespace Microsoft.Xna.Framework.Graphics
     {
         internal RenderTargetView[] _renderTargetViews;
         internal DepthStencilView _depthStencilView;
-        private RenderTarget2D _resolvedTexture;
+        private SharpDX.Direct3D11.Texture2D _resolvedTexture;
+        private SampleDescription _sampleDescription;
 
         private void PlatformConstruct(GraphicsDevice graphicsDevice, int width, int height, bool mipMap,
-            DepthFormat preferredDepthFormat, int preferredMultiSampleCount, RenderTargetUsage usage, bool shared)
+            SurfaceFormat preferredFormat, DepthFormat preferredDepthFormat, int preferredMultiSampleCount, RenderTargetUsage usage, bool shared)
         {
+            _sampleDescription = GraphicsDevice.GetSupportedSampleDescription(SharpDXHelper.ToFormat(preferredFormat), preferredMultiSampleCount);
+
+            // set the actual multisample count, not the preferred value
+            MultiSampleCount = _sampleDescription.Count;
+
             GenerateIfRequired();
         }
 
@@ -26,6 +32,11 @@ namespace Microsoft.Xna.Framework.Graphics
             if (_renderTargetViews != null)
                 return;
 
+            if (_texture == null)
+                CreateTexture();
+
+            var viewTex = MultiSampleCount > 1 ? _resolvedTexture : _texture;
+
             // Create a view interface on the rendertarget to use on bind.
             if (ArraySize > 1)
             {
@@ -33,7 +44,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 for (var i = 0; i < ArraySize; i++)
                 {
                     var renderTargetViewDescription = new RenderTargetViewDescription();
-                    if (GetTextureSampleDescription().Count > 1)
+                    if (MultiSampleCount > 1)
                     {
                         renderTargetViewDescription.Dimension = RenderTargetViewDimension.Texture2DMultisampledArray;
                         renderTargetViewDescription.Texture2DMSArray.ArraySize = 1;
@@ -47,13 +58,12 @@ namespace Microsoft.Xna.Framework.Graphics
                         renderTargetViewDescription.Texture2DArray.MipSlice = 0;
                     }
                     _renderTargetViews[i] = new RenderTargetView(
-                        GraphicsDevice._d3dDevice, GetTexture(),
-                        renderTargetViewDescription);
+                        GraphicsDevice._d3dDevice, viewTex, renderTargetViewDescription);
                 }
             }
             else
             {
-                _renderTargetViews = new[] { new RenderTargetView(GraphicsDevice._d3dDevice, GetTexture()) };
+                _renderTargetViews = new[] { new RenderTargetView(GraphicsDevice._d3dDevice, viewTex) };
             }
 
             // If we don't need a depth buffer then we're done.
@@ -64,7 +74,7 @@ namespace Microsoft.Xna.Framework.Graphics
             // match the texture's multisampling configuration.  Ignore whatever parameters
             // were provided and use the texture's configuration so that things are
             // guarenteed to work.
-            var multisampleDesc = GetTextureSampleDescription();
+            var multisampleDesc = _sampleDescription;
 
             // Create a descriptor for the depth/stencil buffer.
             // Allocate a 2-D surface as the depth/stencil buffer.
@@ -85,7 +95,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     new DepthStencilViewDescription()
                     {
                         Format = SharpDXHelper.ToFormat(DepthStencilFormat),
-                        Dimension = GetTextureSampleDescription().Count > 1 ? DepthStencilViewDimension.Texture2DMultisampled : DepthStencilViewDimension.Texture2D
+                        Dimension = MultiSampleCount > 1 ? DepthStencilViewDimension.Texture2DMultisampled : DepthStencilViewDimension.Texture2D
                     });
             }
         }
@@ -112,8 +122,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     _renderTargetViews = null;
                 }
                 SharpDX.Utilities.Dispose(ref _depthStencilView);
-                if (_resolvedTexture != null)
-                    SharpDX.Utilities.Dispose(ref _resolvedTexture);
+                SharpDX.Utilities.Dispose(ref _resolvedTexture);
             }
 
             base.Dispose(disposing);
@@ -131,80 +140,52 @@ namespace Microsoft.Xna.Framework.Graphics
             return _depthStencilView;
         }
 
-        protected internal override SampleDescription CreateSampleDescription()
-        {
-            return this.GraphicsDevice.GetSupportedSampleDescription
-                (SharpDXHelper.ToFormat(this._format), this.MultiSampleCount);
-        }
-
         internal void ResolveSubresource()
         {
             lock (GraphicsDevice._d3dContext)
             {
                 GraphicsDevice._d3dContext.ResolveSubresource(
-                    this._texture,
+                    _resolvedTexture,
                     0,
-                    _resolvedTexture._texture,
+                    _texture,
                     0,
                     SharpDXHelper.ToFormat(_format));
             }
         }
 
-        internal override Resource CreateTexture()
+        internal override void CreateTexture()
         {
-            var rt = base.CreateTexture();
+            base.CreateTexture();
+            var desc = GetTexture2DDescription();
+
+            desc.BindFlags |= BindFlags.RenderTarget;
+
+            if (Mipmap)
+                desc.OptionFlags |= ResourceOptionFlags.GenerateMipMaps;
+
+            _texture = new SharpDX.Direct3D11.Texture2D(GraphicsDevice._d3dDevice, desc);
 
             // MSAA RT needs another non-MSAA texture where it is resolved
-            if (SampleDescription.Count > 1)
+            // we store the resolved texture in _texture and the multi sampled texture in _resolvedTexture when MSAA is enabled
+            if (MultiSampleCount > 1)
                 CreateResolvedTexture();
-
-            return rt;
         }
 
         internal void CreateResolvedTexture()
         {
             Debug.Assert(_resolvedTexture == null, "The resolved texture was already created.");
 
-            _resolvedTexture = new RenderTarget2D(
-                    GraphicsDevice,
-                    Width,
-                    Height,
-                    Mipmap,
-                    Format,
-                    DepthStencilFormat,
-                    1,
-                    RenderTargetUsage,
-                    Shared,
-                    ArraySize);
-
-        }
-
-        protected override ShaderResourceView CreateShaderResourceView()
-        {
-            if (MultiSampleCount > 1)
-                return new SharpDX.Direct3D11.ShaderResourceView
-                (GraphicsDevice._d3dDevice, _resolvedTexture.GetTexture());
-            else
-                return base.CreateShaderResourceView();
-        }
-
-        protected internal override Texture2DDescription GetTexture2DDescription()
-        {
-            var desc = base.GetTexture2DDescription();
-
+            var desc = GetTexture2DDescription();
             desc.BindFlags |= BindFlags.RenderTarget;
-            if (desc.SampleDescription.Count > 1)
-                desc.BindFlags &= ~BindFlags.ShaderResource;
 
-            if (Mipmap)
-            {
-                // Note: XNA 4 does not have a method Texture.GenerateMipMaps() 
-                // because generation of mipmaps is not supported on the Xbox 360.
-                // TODO: New method Texture.GenerateMipMaps() required.
-                desc.OptionFlags |= ResourceOptionFlags.GenerateMipMaps;
-            }
+            // the multi sampled texture can never be bound directly
+            desc.BindFlags &= ~BindFlags.ShaderResource;
+            desc.SampleDescription = _sampleDescription;
 
-            return desc;
+            // mip mapping is applied to the resolved texture, not the multisampled texture
+            desc.MipLevels = 1;
+            var descr = desc;
+            _resolvedTexture = new SharpDX.Direct3D11.Texture2D(GraphicsDevice._d3dDevice, descr);
         }
     }
 }

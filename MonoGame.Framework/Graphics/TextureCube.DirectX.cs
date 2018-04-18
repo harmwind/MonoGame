@@ -12,8 +12,8 @@ using MapFlags = SharpDX.Direct3D11.MapFlags;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
-	public partial class TextureCube
-	{
+    public partial class TextureCube
+    {
         private bool _renderTarget;
         private bool _mipMap;
 
@@ -26,7 +26,7 @@ namespace Microsoft.Xna.Framework.Graphics
             GetTexture();
         }
 
-        internal override SharpDX.Direct3D11.Resource CreateTexture()
+        internal override void CreateTexture()
         {
             var description = new Texture2DDescription
             {
@@ -49,7 +49,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     description.OptionFlags |= ResourceOptionFlags.GenerateMipMaps;
             }
 
-            return new SharpDX.Direct3D11.Texture2D(GraphicsDevice._d3dDevice, description);
+            _texture = new SharpDX.Direct3D11.Texture2D(GraphicsDevice._d3dDevice, description);
         }
 
         private void PlatformGetData<T>(CubeMapFace cubeMapFace, int level, Rectangle rect, T[] data, int startIndex, int elementCount) where T : struct
@@ -140,7 +140,7 @@ namespace Microsoft.Xna.Framework.Graphics
             // Use try..finally to make sure dataHandle is freed in case of an error
             try
             {
-                var dataPtr = (IntPtr) (dataHandle.AddrOfPinnedObject().ToInt64() + startIndex*elementSizeInByte);
+                var dataPtr = (IntPtr)(dataHandle.AddrOfPinnedObject().ToInt64() + startIndex * elementSizeInByte);
                 var box = new DataBox(dataPtr, GetPitch(rect.Width), 0);
 
                 var subresourceIndex = CalculateSubresourceIndex(face, level);
@@ -165,10 +165,10 @@ namespace Microsoft.Xna.Framework.Graphics
             }
         }
 
-	    private int CalculateSubresourceIndex(CubeMapFace face, int level)
-	    {
-	        return (int) face * _levelCount + level;
-	    }
-	}
+        private int CalculateSubresourceIndex(CubeMapFace face, int level)
+        {
+            return (int)face * _levelCount + level;
+        }
+    }
 }
 
