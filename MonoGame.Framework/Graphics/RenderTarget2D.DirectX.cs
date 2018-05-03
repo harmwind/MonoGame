@@ -155,7 +155,6 @@ namespace Microsoft.Xna.Framework.Graphics
 
         internal override void CreateTexture()
         {
-            base.CreateTexture();
             var desc = GetTexture2DDescription();
 
             desc.BindFlags |= BindFlags.RenderTarget;
@@ -163,7 +162,7 @@ namespace Microsoft.Xna.Framework.Graphics
             if (Mipmap)
                 desc.OptionFlags |= ResourceOptionFlags.GenerateMipMaps;
 
-            //_texture = new SharpDX.Direct3D11.Texture2D(GraphicsDevice._d3dDevice, desc);
+            _texture = new SharpDX.Direct3D11.Texture2D(GraphicsDevice._d3dDevice, desc);
 
             // MSAA RT needs another non-MSAA texture where it is resolved
             // we store the resolved texture in _texture and the multi sampled texture in _resolvedTexture when MSAA is enabled
