@@ -26,14 +26,14 @@ namespace Microsoft.Xna.Framework.Input
         internal static extern bool GetCursorPos(out POINTSTRUCT pt);
 
         [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto)]
-        internal static extern int MapWindowPoints(HandleRef hWndFrom, HandleRef hWndTo, out POINTSTRUCT pt, int cPoints);
+        internal static extern int MapWindowPoints(IntPtr hWndFrom, IntPtr hWndTo, out POINTSTRUCT pt, int cPoints);
 
-        private static Control _window;
+        private static IntPtr _windowHandle;
         private static MouseInputWnd _mouseInputWnd = new MouseInputWnd();
 
         private static IntPtr PlatformGetWindowHandle()
         {
-            return (_window == null) ? IntPtr.Zero : _window.Handle;
+            return _windowHandle;
         }
 
         private static void PlatformSetWindowHandle(IntPtr windowHandle)
@@ -42,7 +42,7 @@ namespace Microsoft.Xna.Framework.Input
             if (_mouseInputWnd.Handle != IntPtr.Zero)
                 _mouseInputWnd.ReleaseHandle();
 
-            _window = Control.FromHandle(windowHandle);
+            _windowHandle = windowHandle;
             _mouseInputWnd.AssignHandle(windowHandle);
         }
 
@@ -53,11 +53,11 @@ namespace Microsoft.Xna.Framework.Input
 
         private static MouseState PlatformGetState()
         {
-            if (_window != null)
+            if (_windowHandle != IntPtr.Zero)
             {
                 POINTSTRUCT pos;
                 GetCursorPos(out pos);
-                MapWindowPoints(new HandleRef(null, IntPtr.Zero), new HandleRef(_window, WindowHandle), out pos, 1);
+                MapWindowPoints(IntPtr.Zero, _windowHandle, out pos, 1);
                 var clientPos = new System.Drawing.Point(pos.X, pos.Y);
                 var buttons = Control.MouseButtons;
 
@@ -85,13 +85,15 @@ namespace Microsoft.Xna.Framework.Input
                 PrimaryWindow.MouseState.Y = y;
             }
 
-            var pt = _window.PointToScreen(new System.Drawing.Point(x, y));
-            SetCursorPos(pt.X, pt.Y);
+            SetCursorPos(x, y);
+
+            //var pt = _window.PointToScreen(new System.Drawing.Point(x, y));
+            //SetCursorPos(pt.X, pt.Y);
         }
 
         public static void PlatformSetCursor(MouseCursor cursor)
         {
-            _window.Cursor = cursor.Cursor;
+            //_window.Cursor = cursor.Cursor;
         }
 
         #region Nested class MouseInputWnd
