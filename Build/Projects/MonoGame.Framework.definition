@@ -49,9 +49,9 @@
 	<DefineNET4DetectionConstant>True</DefineNET4DetectionConstant>
 
     <FrameworkVersions>
-	  <Platform Name="Android">
-            <Version>v4.4</Version>
-          </Platform>
+      <Platform Name="Android">
+        <Version>v4.4</Version>
+      </Platform>
     </FrameworkVersions>
 
   </Properties>
@@ -978,13 +978,16 @@
       <Platforms>WindowsUniversal</Platforms>
     </Compile>
     <Compile Include="Input\KeyboardInput.cs">
-      <Platforms>Android,iOS,WindowsUniversal</Platforms>
+      <Platforms>Android,iOS,Windows,WindowsUniversal</Platforms>
     </Compile>
     <Compile Include="Input\KeyboardInput.Android.cs">
       <Platforms>Android</Platforms>
     </Compile>
     <Compile Include="Input\KeyboardInput.IOS.cs">
       <Platforms>iOS</Platforms>
+    </Compile>
+    <Compile Include="Input\KeyboardInput.Windows.cs">
+      <Platforms>Windows</Platforms>
     </Compile>
     <Compile Include="Input\KeyboardInput.WinRT.cs">
       <Platforms>WindowsUniversal</Platforms>
@@ -993,13 +996,16 @@
     <Compile Include="Input\Keys.cs" />
     <Compile Include="Input\KeyState.cs" />
     <Compile Include="Input\MessageBox.cs">
-      <Platforms>Android,iOS,WindowsUniversal</Platforms>
+      <Platforms>Android,iOS,Windows,WindowsUniversal</Platforms>
     </Compile>
     <Compile Include="Input\MessageBox.Android.cs">
       <Platforms>Android</Platforms>
     </Compile>
     <Compile Include="Input\MessageBox.IOS.cs">
       <Platforms>iOS</Platforms>
+    </Compile>
+    <Compile Include="Input\MessageBox.Windows.cs">
+      <Platforms>Windows</Platforms>
     </Compile>
     <Compile Include="Input\MessageBox.WinRT.cs">
       <Platforms>WindowsUniversal</Platforms>
@@ -1246,6 +1252,15 @@
 
 
     <!-- Common Desktop Platform -->
+    <Compile Include="Utilities\FuncLoader.Desktop.cs">
+      <Platforms>Angle,Linux,WindowsGL,MacOS</Platforms>
+    </Compile>
+    <Compile Include="Utilities\FuncLoader.Android.cs">
+      <Platforms>Android</Platforms>
+    </Compile>
+    <Compile Include="Utilities\FuncLoader.iOS.cs">
+      <Platforms>iOS,tvOS</Platforms>
+    </Compile>
     <Compile Include="SDL\SDLGamePlatform.cs">
       <Platforms>Angle,Linux,WindowsGL,MacOS</Platforms>
     </Compile>
@@ -1262,7 +1277,7 @@
       <LogicalName>MonoGame.bmp</LogicalName>
       <Platforms>Angle,Linux,WindowsGL,MacOS</Platforms>
     </EmbeddedResource>
-	 <EmbeddedResource Include="SDL\gamecontrollerdb.txt">
+    <EmbeddedResource Include="..\ThirdParty\SDL_GameControllerDB\gamecontrollerdb.txt">
       <Platforms>Angle,Linux,WindowsGL,MacOS</Platforms>
       <LogicalName>gamecontrollerdb.txt</LogicalName>
     </EmbeddedResource>
