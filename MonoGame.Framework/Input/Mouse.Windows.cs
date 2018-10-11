@@ -28,6 +28,9 @@ namespace Microsoft.Xna.Framework.Input
         [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto)]
         internal static extern int MapWindowPoints(IntPtr hWndFrom, IntPtr hWndTo, out POINTSTRUCT pt, int cPoints);
 
+        [DllImport("user32.dll")]
+        private static extern short GetAsyncKeyState(int key);
+
         private static IntPtr _windowHandle;
         private static MouseInputWnd _mouseInputWnd = new MouseInputWnd();
 
@@ -59,17 +62,24 @@ namespace Microsoft.Xna.Framework.Input
                 GetCursorPos(out pos);
                 MapWindowPoints(IntPtr.Zero, _windowHandle, out pos, 1);
                 var clientPos = new System.Drawing.Point(pos.X, pos.Y);
-                var buttons = Control.MouseButtons;
+
+                //Use GetAsyncKeyState instead of Control.MouseButtons since this also works from other threads than the main thread
+
+                bool leftButton = GetAsyncKeyState(0x01) < 0;
+                bool rightButton = GetAsyncKeyState(0x02) < 0;
+                bool middleButton = GetAsyncKeyState(0x04) < 0;
+                bool xButton1 = GetAsyncKeyState(0x05) < 0;
+                bool xButton2 = GetAsyncKeyState(0x06) < 0;
 
                 return new MouseState(
                     clientPos.X,
                     clientPos.Y,
                     _mouseInputWnd.ScrollWheelValue,
-                    (buttons & MouseButtons.Left) == MouseButtons.Left ? ButtonState.Pressed : ButtonState.Released,
-                    (buttons & MouseButtons.Middle) == MouseButtons.Middle ? ButtonState.Pressed : ButtonState.Released,
-                    (buttons & MouseButtons.Right) == MouseButtons.Right ? ButtonState.Pressed : ButtonState.Released,
-                    (buttons & MouseButtons.XButton1) == MouseButtons.XButton1 ? ButtonState.Pressed : ButtonState.Released,
-                    (buttons & MouseButtons.XButton2) == MouseButtons.XButton2 ? ButtonState.Pressed : ButtonState.Released,
+                    leftButton ? ButtonState.Pressed : ButtonState.Released,
+                    middleButton ? ButtonState.Pressed : ButtonState.Released,
+                    rightButton ? ButtonState.Pressed : ButtonState.Released,
+                    xButton1 ? ButtonState.Pressed : ButtonState.Released,
+                    xButton2 ? ButtonState.Pressed : ButtonState.Released,
                     _mouseInputWnd.HorizontalScrollWheelValue
                     );
             }
