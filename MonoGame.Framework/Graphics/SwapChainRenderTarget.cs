@@ -160,9 +160,9 @@ namespace Microsoft.Xna.Framework.Graphics
                 {
                     _swapChain.Present(PresentInterval.GetSyncInterval(), PresentFlags.None);
                 }
-                catch (SharpDX.SharpDXException)
-                {
-                }
+                //catch (SharpDX.SharpDXException)
+                //{
+                //}
             }
         }
 

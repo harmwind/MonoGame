@@ -551,7 +551,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     driverType = DriverType.Warp;
                     break;
             }
-            
+
             try
             {
                 // Create the Direct3D device.
@@ -569,7 +569,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             // Get Direct3D 11.1 context
             _d3dContext = _d3dDevice.ImmediateContext.QueryInterface<SharpDX.Direct3D11.DeviceContext>();
-            
+
             // Create a new instance of GraphicsDebug because we support it on Windows platforms.
             _graphicsDebug = new GraphicsDebug(this);
         }
@@ -698,7 +698,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             var format = SharpDXHelper.ToFormat(PresentationParameters.BackBufferFormat);
             var multisampleDesc = GetSupportedSampleDescription(
-                format, 
+                format,
                 PresentationParameters.MultiSampleCount);
 
             // If the swap chain already exists... update it.
@@ -910,7 +910,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     foreach (var view in _currentRenderTargets)
                     {
                         if (view != null)
-							_d3dContext.ClearRenderTargetView(view, new RawColor4(color.X, color.Y, color.Z, color.W));
+                            _d3dContext.ClearRenderTargetView(view, new RawColor4(color.X, color.Y, color.Z, color.W));
                     }
                 }
 
@@ -1027,10 +1027,10 @@ namespace Microsoft.Xna.Framework.Graphics
                 lock (_d3dContext)
                     _swapChain.Present(syncInterval, PresentFlags.None);
             }
-            catch (SharpDX.SharpDXException)
-            {
-                // TODO: How should we deal with a device lost case here?
-            }
+            //catch (SharpDX.SharpDXException)
+            //{
+            //    // TODO: How should we deal with a device lost case here?
+            //}
 #endif
         }
 
@@ -1038,15 +1038,15 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             if (_d3dContext != null)
             {
-				var viewport = new RawViewportF
-				{
-					X = _viewport.X,
-					Y = _viewport.Y,
-					Width = (float)_viewport.Width,
-					Height = (float)_viewport.Height,
-					MinDepth = _viewport.MinDepth,
-					MaxDepth = _viewport.MaxDepth
-				};
+                var viewport = new RawViewportF
+                {
+                    X = _viewport.X,
+                    Y = _viewport.Y,
+                    Width = (float)_viewport.Width,
+                    Height = (float)_viewport.Height,
+                    MinDepth = _viewport.MinDepth,
+                    MaxDepth = _viewport.MaxDepth
+                };
                 lock (_d3dContext)
                     _d3dContext.Rasterizer.SetViewport(viewport);
             }
@@ -1207,11 +1207,11 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private SharpDX.Mathematics.Interop.RawColor4 GetBlendFactor()
         {
-			return new SharpDX.Mathematics.Interop.RawColor4(
-					BlendFactor.R / 255.0f,
-					BlendFactor.G / 255.0f,
-					BlendFactor.B / 255.0f,
-					BlendFactor.A / 255.0f);
+            return new SharpDX.Mathematics.Interop.RawColor4(
+                    BlendFactor.R / 255.0f,
+                    BlendFactor.G / 255.0f,
+                    BlendFactor.B / 255.0f,
+                    BlendFactor.A / 255.0f);
         }
 
         internal void PlatformApplyState(bool applyShaders)
@@ -1376,7 +1376,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     _userIndexBuffer32 = new DynamicIndexBuffer(this, indexElementSize, requiredIndexCount, BufferUsage.WriteOnly);
                 }
 
-                buffer = _userIndexBuffer32;                
+                buffer = _userIndexBuffer32;
             }
 
             var startIndex = buffer.UserOffset;
@@ -1572,7 +1572,7 @@ namespace Microsoft.Xna.Framework.Graphics
                         }
                         finally
                         {
-                            SharpDX.Utilities.Dispose( ref stream);
+                            SharpDX.Utilities.Dispose(ref stream);
                         }
                     }
                 }
