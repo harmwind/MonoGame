@@ -1019,14 +1019,14 @@ namespace Microsoft.Xna.Framework.Graphics
 #endif
 #if WINDOWS
 
-            try
-            {
-                var syncInterval = PresentationParameters.PresentationInterval.GetSyncInterval();
+            //try
+            //{
+            var syncInterval = PresentationParameters.PresentationInterval.GetSyncInterval();
 
-                // The first argument instructs DXGI to block n VSyncs before presenting.
-                lock (_d3dContext)
-                    _swapChain.Present(syncInterval, PresentFlags.None);
-            }
+            // The first argument instructs DXGI to block n VSyncs before presenting.
+            lock (_d3dContext)
+                _swapChain.Present(syncInterval, PresentFlags.None);
+            //}
             //catch (SharpDX.SharpDXException)
             //{
             //    // TODO: How should we deal with a device lost case here?
