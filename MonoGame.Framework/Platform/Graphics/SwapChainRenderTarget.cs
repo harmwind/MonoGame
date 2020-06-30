@@ -64,12 +64,7 @@ namespace Microsoft.Xna.Framework.Graphics
                              ? SharpDX.DXGI.Format.B8G8R8A8_UNorm
                              : SharpDXHelper.ToFormat(surfaceFormat);
 
-            var multisampleDesc = new SampleDescription(1, 0);
-            if (preferredMultiSampleCount > 1)
-            {
-                multisampleDesc.Count = preferredMultiSampleCount;
-                multisampleDesc.Quality = (int)StandardMultisampleQualityLevels.StandardMultisamplePattern;
-            }
+            var multisampleDesc = graphicsDevice.GetSupportedSampleDescription(dxgiFormat, preferredMultiSampleCount);
 
             var desc = new SwapChainDescription()
             {
