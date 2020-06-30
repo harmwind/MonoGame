@@ -12,13 +12,17 @@ This package provides you with MonoGame Framework that uses DirectX for renderin
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="bin\**\*" />
-    <Compile Remove="obj\**\*" />
+    <Compile Remove="bin\**" />
+    <Compile Remove="obj\**" />
     <Compile Remove="Platform\**\*" />
     <Compile Remove="Properties\**\*" />
+    <EmbeddedResource Remove="bin\**" />
+    <EmbeddedResource Remove="obj\**" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="bin\**" />
+    <None Remove="obj\**" />
     <None Remove="Platform\**\*" />
   </ItemGroup>
 
@@ -56,7 +60,7 @@ This package provides you with MonoGame Framework that uses DirectX for renderin
 
   <ItemGroup>
     <Compile Include="..\ThirdParty\StbImageSharp\src\StbImageSharp\**\*.cs" LinkBase="Utilities\StbImageSharp" />
-    <Compile Include="..\ThirdParty\StbImageWriteSharp\src\StbImageWriteSharp\**\*.cs" LinkBase="Utilities\StbImageWriteSharp"/>
+    <Compile Include="..\ThirdParty\StbImageWriteSharp\src\StbImageWriteSharp\**\*.cs" LinkBase="Utilities\StbImageWriteSharp" />
   </ItemGroup>
 
   <ItemGroup>

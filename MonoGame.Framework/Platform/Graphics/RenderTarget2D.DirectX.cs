@@ -4,6 +4,7 @@
 
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
+using System.Diagnostics;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -16,7 +17,7 @@ namespace Microsoft.Xna.Framework.Graphics
         private SampleDescription _sampleDescription;
 
         private void PlatformConstruct(GraphicsDevice graphicsDevice, int width, int height, bool mipMap,
-            SurfaceFormat preferredFormat, DepthFormat preferredDepthFormat, int preferredMultiSampleCount, RenderTargetUsage usage, bool shared)
+            DepthFormat preferredDepthFormat, int preferredMultiSampleCount, RenderTargetUsage usage, bool shared)
         {
             _sampleDescription = GraphicsDevice.GetSupportedSampleDescription(SharpDXHelper.ToFormat(preferredDepthFormat), preferredMultiSampleCount);
             // set the actual multisample count, not the preferred value
@@ -140,12 +141,12 @@ namespace Microsoft.Xna.Framework.Graphics
 
         internal void ResolveSubresource()
         {
-            //if (GraphicsDevice == null)
-            //    return;
+            if (GraphicsDevice == null)
+                return;
 
-            //// An MSAA SwapChainRenderTarget doesn't need a _resolvedTexture
-            //if (this is SwapChainRenderTarget)
-            //    return;
+            // An MSAA SwapChainRenderTarget doesn't need a _resolvedTexture
+            if (this is SwapChainRenderTarget)
+                return;
 
             lock (GraphicsDevice._d3dContext)
             {
@@ -168,20 +169,26 @@ namespace Microsoft.Xna.Framework.Graphics
             _texture = new SharpDX.Direct3D11.Texture2D(GraphicsDevice._d3dDevice, desc);
 
             // MSAA RT needs a MSAA texture and a non-MSAA texture where it is resolved
-            // we store the resolved texture in _texture and the multi sampled texture
-            // in _msTexture when MSAA is enabled
+            // we store the resolved texture in _texture and the multi sampled texture in _msTexture when MSAA is enabled
             if (MultiSampleCount > 1)
-            {
-                desc = GetTexture2DDescription();
-                desc.BindFlags |= BindFlags.RenderTarget;
-                // the multi sampled texture can never be bound directly
-                desc.BindFlags &= ~BindFlags.ShaderResource;
-                desc.SampleDescription = _sampleDescription;
-                // mip mapping is applied to the resolved texture, not the multisampled texture
-                desc.MipLevels = 1;
-                var descr = desc;
-                _msTexture = new SharpDX.Direct3D11.Texture2D(GraphicsDevice._d3dDevice, descr);
-            }
+                CreateResolvedTexture();
+        }
+
+        internal void CreateResolvedTexture()
+        {
+            Debug.Assert(_msTexture == null, "The resolved texture was already created.");
+
+            var desc = GetTexture2DDescription();
+            desc.BindFlags |= BindFlags.RenderTarget;
+
+            // the multi sampled texture can never be bound directly
+            desc.BindFlags &= ~BindFlags.ShaderResource;
+            desc.SampleDescription = _sampleDescription;
+
+            // mip mapping is applied to the resolved texture, not the multisampled texture
+            desc.MipLevels = 1;
+            var descr = desc;
+            _msTexture = new SharpDX.Direct3D11.Texture2D(GraphicsDevice._d3dDevice, descr);
         }
     }
 }
