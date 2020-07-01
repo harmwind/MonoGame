@@ -180,15 +180,12 @@ namespace Microsoft.Xna.Framework.Graphics
 
             var desc = GetTexture2DDescription();
             desc.BindFlags |= BindFlags.RenderTarget;
-
             // the multi sampled texture can never be bound directly
             desc.BindFlags &= ~BindFlags.ShaderResource;
             desc.SampleDescription = _sampleDescription;
-
             // mip mapping is applied to the resolved texture, not the multisampled texture
             desc.MipLevels = 1;
-            var descr = desc;
-            _msTexture = new SharpDX.Direct3D11.Texture2D(GraphicsDevice._d3dDevice, descr);
+            _msTexture = new SharpDX.Direct3D11.Texture2D(GraphicsDevice._d3dDevice, desc);
         }
     }
 }
